@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>student Home</title>
+    <style>
+        #details,#marks,#taken_books{
+            height: 260px;
+            width: 344px;
+            background-color: bisque;
+            border-radius: 15px;
+            box-shadow: 10px 10px 10px 0px gray;
+            color: olive;
+            font-size: large;
+            font-family: "JetBrains Mono SemiBold";
+            margin-left: 5px;
+        }
+        #search_book,#take_book,#submit_book,#result_book{
+            height: 260px;
+            width: 344px;
+            background-color: bisque;
+            border-radius: 15px;
+            box-shadow: 10px 10px 10px 0px gray;
+            color: olive;
+            font-size: large;
+            font-family: "JetBrains Mono SemiBold";
+            margin-left: 5px;
+            margin-top: 5px;
+        }
+        #top{
+            height: 75px;
+            width: auto;
+            background-color: beige;
+            font-size: 50px;
+            color: aqua;
+        }
+        #update{
+            height: 260px;
+            width: 344px;
+            background-color: bisque;
+            border-radius: 15px;
+            box-shadow: 10px 10px 10px 0px gray;
+            margin-left: 5px;
+        }
+        input{
+            height: 30px;
+            width: 150px;
+            margin-left: 50px;
+            background-color: aliceblue;
+            border-color: chocolate;
+            border-radius: 10px;
+            box-shadow: 3px 3px 3px 0px gray;
+        }
+        .sub_btns{
+            height: 40px;
+            width: 300px;
+            background-color: aliceblue;
+            border-color: gray;
+            border-radius: 20px;
+            box-shadow: 3px 3px 3px 0px gray;
+
+        }
+    </style>
+</head>
+<body>
+<div id = "top"> University</div>
+<div style="display: inline-flex">
+    <div id="details">
+
+    </div>
+
+    <div id="update">
+        <h3 style="margin-left: 70px;color: cadetblue">Update your details</h3>
+            <label>Name</label>
+            <input type="text" id="student_name" required><br>
+            <label>Password</label>
+            <input type="password" id="student_password" required><br>
+            <label>Phone</label>
+            <input type="number" id="student_phone" required><br>
+            <label>Email</label>
+            <input type="email" id="student_email" required><br>
+            <button type="submit" class="sub_btns" onclick="update()">submit</button>
+    </div>
+    <div id="marks"></div>
+    <div id="taken_books">taken books list</div>
+
+</div>
+<div style="display: inline-flex">
+    <div id="search_book">
+        <label style="margin-left: 10px;font-size: 25px">title</label>
+        <input type="text" id="title"><br>
+        <label style="margin-left: 10px;font-size: 25px">b_id</label>
+        <input type="number" id="b_id">
+        <button class="sub_btns" onclick="search()">search</button>
+    </div>
+    <div id="result_book"></div>
+    <div id="take_book"></div>
+    <div id="submit_book"></div>
+</div>
+
+<script>
+    console.log(localStorage.getItem('username'));
+    // fetching details
+    fetch(`http://localhost:8080/student/get/${localStorage.getItem('username')}`,{
+        method:'GET',
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {if (!response.ok){throw new Error('error at response')}
+        return response.json();
+    }).then(data => {
+        console.log("data",data);
+        document.getElementById("details").innerHTML =
+            `<p>id: ${data.student_id}</p>
+                         <p>name: ${data.student_name}</p>
+                         <p>email: ${data.student_email}</p>
+                         <p>roll no: ${data.student_id}</p>
+                         <p>password: ${data.student_password}</p>`;
+    }).catch(error => {
+        console.error('error',error);
+        document.getElementById("details").innerHTML = 'login was not proper';
+    })
+
+    // fetching bookallotment
+    fetch(`http://localhost:8080/bookallotment/get/owner_id/${localStorage.getItem('username')}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('response not ok');
+        }
+        return response.json();
+    }).then(data => {
+        let booksHTML = '';
+        console.log("data", data);
+
+        // Create an array of fetch promises for each book
+        const fetchPromises = data.map(items => {
+            return fetch(`http://localhost:8080/book/get/b_id/${items.b_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('response not ok');
+                }
+                return response.json();
+            }).then(data1 => {
+                console.log("data1", data1);
+                console.log("items", items);
+                booksHTML += `<p>${items.ba_id} : ${items.b_id} : ${data1.title}</p>`;
+            });
+        });
+
+        // Wait for all fetches to complete
+        return Promise.all(fetchPromises).then(() => booksHTML);
+    }).then(booksHTML => {
+        console.log("booksHTML:", booksHTML);
+        if (booksHTML !== '') {
+            document.getElementById("taken_books").innerHTML = booksHTML;
+        } else {
+            document.getElementById("taken_books").innerHTML = 'no books to show';
+        }
+    }).catch(error => {
+        document.getElementById("taken_books").innerHTML = 'no books to show';
+    });
+
+
+
+    function update(){
+        var student_name = document.getElementById("student_name").value;
+        var student_password = document.getElementById("student_password").value;
+        var student_email = document.getElementById("student_email").value;
+        var student_phone = document.getElementById("student_phone").value;
+        if (!student_name || !student_password || !student_email || !student_phone) {
+            document.getElementById("update").innerHTML = "All fields are required.";
+            return;
+        }
+        var obj = {
+            student_name : student_name,
+            student_password : student_password,
+            student_phone : student_phone,
+            student_email : student_email
+        }
+        fetch(`http://localhost:8080/student/update/${localStorage.getItem('username')}`,{
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(obj)
+        })
+            .then(response => {
+                if (!response.ok){
+                    document.getElementById("update").innerHTML = "registration failure";
+                    throw new Error("not ok");
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log(data);
+                document.getElementById("update").innerHTML = "registration success please do re login to see updated details";
+            })
+    }
+
+    function search(){
+        let title = document.getElementById("title").value;
+        let b_id = document.getElementById("b_id").value;
+        if (title != null & title != ""){
+            fetch(`http://localhost:8080/book/get/title?title=${title}`,{
+                method : 'GET'
+            }).then(response => {
+                if (!response.ok){throw new Error('response not ok')}
+                return response.text();
+            }).then(data => {
+                document.getElementById("result_book").innerHTML = data;
+            })
+        }else {
+            fetch(`http://localhost:8080/book/get/b_id/${b_id}`,{
+                method : 'GET',
+                headers : {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (!response.ok){throw new Error('response not ok')}
+                return response.json();
+            }).then(data => {
+                document.getElementById("result_book").innerHTML = `
+                                                    <p>book id : ${data.b_id}</p>
+                                                    <p>book title : ${data.title}</p>
+                                                    <p>book author : ${data.author}</p>`;
+            })
+        }
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Data</title>
+</head>
+<body>
+<h1>Employee Data</h1>
+
+<h2>Get Employee by ID</h2>
+<input type="number" id="id" placeholder="Enter Employee ID">
+<button onclick="getEmployee()">Get Employee</button>
+<div id="Detail"></div>
+
+<h2>Get Student by ID</h2>
+<input type="number" id="studentId" placeholder="Enter Student ID">
+<button onclick="getStudent()">Get Student</button>
+<div id="StudentDetail"></div>
+
+<script>
+    function getEmployee() {
+        const e_id = document.getElementById("id").value;
+        console.log('e_id', e_id);
+        fetch(`http://localhost:8080/employee/get/${e_id}`)
+            .then(async (response) => {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("data",data);
+                document.getElementById("Detail").innerHTML =
+                    `<p>id: ${data.e_id}</p>
+                         <p>name: ${data.e_name}</p>
+                         <p>role: ${data.e_email}</p>`;
+            })
+            .catch(error => {
+                console.error('Error fetching employee:', error);
+                document.getElementById("Detail").innerHTML = "Employee not found";
+            });
+    }
+
+    function getStudent() {
+        const student_id = document.getElementById("studentId").value;
+        fetch(`http://localhost:8080/student/get/${student_id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                document.getElementById("StudentDetail").innerHTML =
+                    `<p>id: ${data.student_id}</p>
+                         <p>name: ${data.student_name}</p>
+                         <p>phone number: ${data.student_phone}</p>`;
+            })
+            .catch(error => {
+                console.error('Error fetching student:', error);
+                document.getElementById("StudentDetail").innerHTML = "Student not found";
+            });
+    }
+</script>
+</body>
+</html>

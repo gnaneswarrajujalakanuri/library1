@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            background-image: url("/templates/lpu.jpg");
+            background-position: center;
+            background-size: cover;
+        }
+        input{
+            height: 30px;
+            width: 150px;
+            margin-left: 50px;
+            background-color: aliceblue;
+            border-color: chocolate;
+            border-radius: 10px;
+            box-shadow: 3px 3px 3px 0px gray;
+        }
+        #container {
+            height: 320px;
+            width: 600px;
+            background-color: aliceblue;
+            border-radius: 15px;
+            box-shadow: 10px 10px 10px 0px gray;
+            margin-left: 350px;
+            margin-top: 150px;
+        }
+        #container_btns {
+            padding-left: 180px;
+            background-color: gainsboro;
+            border-radius: 10px;
+        }
+        #container_details{
+            color: gray;
+            font-size: 25px;
+            border-radius: 15px;
+        }
+        #res{
+            font-size: 15px;
+            color: red;
+        }
+        #res_stu{
+            font-size: 15px;
+            color: red;
+        }
+        #res_emp{
+            font-size: 15px;
+            color: red;
+        }
+        .btns{
+            height: 40px;
+            width: 70px;
+            background-color: aliceblue;
+            border-color: gray;
+            border-radius: 20px;
+            box-shadow: 3px 3px 3px 0px gray;
+
+        }
+        .btns:hover,.sub_btns:hover{
+            background-color: cyan;
+        }
+        .sub_btns{
+            height: 40px;
+            width: 300px;
+            background-color: aliceblue;
+            border-color: gray;
+            border-radius: 20px;
+            box-shadow: 3px 3px 3px 0px gray;
+
+        }
+        .signin, .stu_register , .emp_register {
+            display: none; /* Initially hide both sections */
+            padding-left: 170px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="container_btns">
+        <select class="btns" id="ownertype">
+            <option>student</option>
+            <option>employee</option>
+        </select>
+
+        <button class="btns" onclick="showSignIn()">sign in</button>
+        <button class="btns" onclick="showRegister()">register</button>
+    </div>
+
+    <div id="container_details">
+        <div id="signin" class="signin">
+            <label>Username</label>
+            <input type="text" id="username"><br>
+            <label>Pass-word</label>
+            <input type="password" id="password"><br>
+            <button type="submit" class="sub_btns" onclick="login()">submit</button>
+            <div id="res"></div>
+        </div>
+        <div id="stu_register" class="stu_register">
+            <label>Name</label>
+            <input type="text" id="student_name" required><br>
+            <label>Password</label>
+            <input type="password" id="student_password" required><br>
+            <label>Phone</label>
+            <input type="number" id="student_phone" required><br>
+            <label>Email</label>
+            <input type="email" id="student_email" required><br>
+            <button type="submit" class="sub_btns" onclick="register()">submit</button>
+            <div id="res_stu"></div>
+        </div>
+        <div id="emp_register" class="emp_register">
+            <label>Name</label>
+            <input type="text" id="e_name" required><br>
+            <label>Password</label>
+            <input type="password" id="e_password" required><br>
+            <label>Phone</label>
+            <input type="number" id="e_phone" required><br>
+            <label>Email</label>
+            <input type="email" id="e_email" required><br>
+            <button type="submit" class="sub_btns" onclick="register()">submit</button>
+            <div id="res_emp"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("signin").style.display = "block";
+    function showSignIn() {
+        document.getElementById("signin").style.display = "block";
+        document.getElementById("stu_register").style.display = "none";
+        document.getElementById("emp_register").style.display = "none";
+    }
+
+    function showRegister() {
+        if (document.getElementById("ownertype").value==="student") {
+            document.getElementById("signin").style.display = "none";
+            document.getElementById("stu_register").style.display = "block";
+            document.getElementById("emp_register").style.display = "none";
+        }
+        if (document.getElementById("ownertype").value==="employee"){
+            document.getElementById("signin").style.display = "none";
+            document.getElementById("stu_register").style.display = "none";
+            document.getElementById("emp_register").style.display = "block";
+        }
+    }
+
+    function login(){
+        var username = document.getElementById("username").value
+        var password = document.getElementById("password").value
+        var type = document.getElementById("ownertype").value
+        if (document.getElementById("ownertype").value==="student"){
+            fetch(`http://localhost:8080/login?username=${username}&password=${password}&type=${type}`,
+                {method:'GET',
+
+                } )
+                .then(response => {
+                    if (!response.ok){
+                        document.getElementById("res").innerHTML="login failed because password or username is wrong";
+                        throw new Error("not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    if (data === "student login success"){
+                        localStorage.setItem('username',username);
+                        console.log(localStorage.getItem('username'));
+                        window.location.href = "studentHome.html";
+                    }else {
+                        document.getElementById("res").innerHTML="login failed because password or username is wrong";
+                    }
+                })
+        }
+        if (document.getElementById("ownertype").value==="employee"){
+            fetch(`http://localhost:8080/login?username=${username}&password=${password}&type=${type}`,
+                {method:'GET',
+
+                } )
+                .then(response => {
+                    if (!response.ok){
+                        document.getElementById("res").innerHTML="login failed because password or username is wrong";
+                        throw new Error("not ok");
+
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    if (data === "employee login success"){
+                        window.location.href = "index.html";
+                    }else {
+                        document.getElementById("res").innerHTML="login failed because password or username is wrong";
+                    }
+                })
+        }
+    }
+    function register(){
+        var type = document.getElementById("ownertype").value;
+
+        if (type==="student"){
+            var student_name = document.getElementById("student_name").value;
+            var student_password = document.getElementById("student_password").value;
+            var student_email = document.getElementById("student_email").value;
+            var student_phone = document.getElementById("student_phone").value;
+            if (!student_name || !student_password || !student_email || !student_phone) {
+                document.getElementById("res_stu").innerHTML = "All fields are required.";
+                return;
+            }
+            var obj = {
+                student_name : student_name,
+                student_password : student_password,
+                student_phone : student_phone,
+                student_email : student_email
+            }
+            fetch(`http://localhost:8080/student/save`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+                .then(response => {
+                    if (!response.ok){
+                        document.getElementById("res_stu").innerHTML = "registration failure";
+                        throw new Error("not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    document.getElementById("res_stu").innerHTML = "registration success";
+                })
+        }
+        if (type==="employee"){
+            var e_name = document.getElementById("e_name").value;
+            var e_password = document.getElementById("e_password").value;
+            var e_email = document.getElementById("e_email").value;
+            var e_phone = document.getElementById("e_phone").value;
+            if (!e_name || !e_password || !e_email || !e_phone) {
+                document.getElementById("res_emp").innerHTML = "All fields are required.";
+                return;
+            }
+            var obj = {
+                e_name : e_name,
+                e_password : e_password,
+                e_phone : e_phone,
+                e_email : e_email
+            }
+            fetch(`http://localhost:8080/employee/save`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+                .then(response => {
+                    if (!response.ok){
+                        document.getElementById("res_emp").innerHTML = "registration failure";
+                        throw new Error("not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    document.getElementById("res_emp").innerHTML = "registration success";
+                })
+        }
+    }
+</script>
+</body>
+</html>
