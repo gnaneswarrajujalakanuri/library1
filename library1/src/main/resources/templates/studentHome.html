@@ -317,8 +317,7 @@
                 console.log("you cannot take this book because "+ data)
                 document.getElementById("take_book").innerHTML = "you cannot take this book because "+ data;
             }else {
-                console.log(`<p>book took successfully</p><p>data[0].b_id </p>
-                                                           <p>data[0].ba_id </p>`)
+                console.log(data[0].b_id,data[0].ba_id)
                 document.getElementById("take_book").innerHTML = `<p>book took successfully</p><p>b_id : ${data[0].b_id} </p>
                                                            <p>ba_id : ${data[0].ba_id} </p>`;
             }
