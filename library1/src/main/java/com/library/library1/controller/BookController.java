@@ -5,9 +5,7 @@ import com.library.library1.serviece.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class BookController {
@@ -43,17 +41,17 @@ public class BookController {
         return null;
     }
     @GetMapping("/book/get/title")
-    public List<String> getBookByTitle(@RequestParam String title) {
+    public Map getBookByTitle(@RequestParam String title) {
         try {
             List<Book> books = bookService.getAllBooks();
-            List<String> bookTitles = new ArrayList<String>();
-            List<String> booksResult = new ArrayList<String>();
+            Map<Long,String> bookTitles = new HashMap<Long,String>();
+            Map<Long,String> booksResult = new HashMap<Long,String>();
             for (Book book : books) {
-                bookTitles.add(book.getTitle());
+                bookTitles.put(book.getB_id(), book.getTitle());
             }
-            for (String bookTitle : bookTitles) {
-                if (bookTitle.contains(title)||bookTitle.toUpperCase().contains(title.toUpperCase())||bookTitle.toLowerCase().contains(title.toLowerCase())){
-                    booksResult.add(bookTitle);
+            for (Map.Entry<Long, String> entry : bookTitles.entrySet()) {
+                if (entry.getValue().contains(title.toLowerCase()) || entry.getValue().contains(title.toUpperCase())) {
+                    booksResult.put(entry.getKey(), entry.getValue());
                 }
             }
             if (booksResult != null){

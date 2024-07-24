@@ -17,6 +17,7 @@
         }
         #search_book,#take_book,#submit_book,#result_book{
             height: 260px;
+            overflow-y: auto;
             width: 344px;
             background-color: bisque;
             border-radius: 15px;
@@ -82,20 +83,26 @@
             <button type="submit" class="sub_btns" onclick="update()">submit</button>
     </div>
     <div id="marks"></div>
-    <div id="taken_books">taken books list</div>
+    <div id="taken_books"></div>
 
 </div>
 <div style="display: inline-flex">
     <div id="search_book">
+        <h3 style="margin-left: 70px;color: cadetblue">Search for book details</h3>
         <label style="margin-left: 10px;font-size: 25px">title</label>
         <input type="text" id="title"><br>
         <label style="margin-left: 10px;font-size: 25px">b_id</label>
         <input type="number" id="b_id">
         <button class="sub_btns" onclick="search()">search</button>
+        <button class="sub_btns" onclick="searchall()">search all books</button>
     </div>
     <div id="result_book"></div>
-    <div id="take_book"></div>
-    <div id="submit_book"></div>
+    <div id="take_book">
+        <h3 style="margin-left: 70px;color: cadetblue">Take books</h3>
+    </div>
+    <div id="submit_book">
+        <h3 style="margin-left: 70px;color: cadetblue">Submit book</h3>
+    </div>
 </div>
 
 <script>
@@ -160,12 +167,13 @@
     }).then(booksHTML => {
         console.log("booksHTML:", booksHTML);
         if (booksHTML !== '') {
+            booksHTML = `<h3 style="margin-left: 70px;color: cadetblue">Taken books list</h3>  ${booksHTML}`
             document.getElementById("taken_books").innerHTML = booksHTML;
         } else {
-            document.getElementById("taken_books").innerHTML = 'no books to show';
+            document.getElementById("taken_books").innerHTML = 'no books taken to show';
         }
     }).catch(error => {
-        document.getElementById("taken_books").innerHTML = 'no books to show';
+        document.getElementById("taken_books").innerHTML = 'no books taken to show';
     });
 
 
@@ -210,12 +218,23 @@
         let b_id = document.getElementById("b_id").value;
         if (title != null & title != ""){
             fetch(`http://localhost:8080/book/get/title?title=${title}`,{
-                method : 'GET'
+                method : 'GET',
+                headers : {
+                    'Content-Type': 'application/json'
+                }
             }).then(response => {
                 if (!response.ok){throw new Error('response not ok')}
-                return response.text();
+                return response.json();
             }).then(data => {
-                document.getElementById("result_book").innerHTML = data;
+                console.log(data)
+                let resultHtml = '<ul>';
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        resultHtml += `<li>ID: ${key}, Title: ${data[key]}</li>`;
+                    }
+                }
+                resultHtml += '</ul>';
+                document.getElementById("result_book").innerHTML = resultHtml;
             })
         }else {
             fetch(`http://localhost:8080/book/get/b_id/${b_id}`,{
@@ -233,6 +252,21 @@
                                                     <p>book author : ${data.author}</p>`;
             })
         }
+    }
+
+    function searchall(){
+        fetch(`http://localhost:8080/book/get/all`,{
+            method : 'GET',
+            headers : {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (!response.ok){throw new Error('response not ok');}
+            return response.text();
+        }).then(data => {
+            console.log(data);
+            document.getElementById("result_book").innerHTML = data;
+        })
     }
 
 
