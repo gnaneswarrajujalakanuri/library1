@@ -6,6 +6,7 @@
     <style>
         #details,#marks,#taken_books{
             height: 260px;
+            overflow-y: auto;
             width: 344px;
             background-color: bisque;
             border-radius: 15px;
@@ -61,10 +62,23 @@
             box-shadow: 3px 3px 3px 0px gray;
 
         }
+        #logout{
+            border-radius: 10px;
+            border-color: aqua;
+            background-color: red;
+            color: white;
+            font-size: x-large;
+            font-family: "Baskerville Old Face";
+            margin-left: 1050px;
+            height: 50px;
+            width: 90px;
+        }
     </style>
 </head>
 <body>
-<div id = "top"> University</div>
+<div id = "top"> University
+    <b><button id="logout" onclick="logout()">Logout</button></b>
+</div>
 <div style="display: inline-flex">
     <div id="details">
 
@@ -99,9 +113,15 @@
     <div id="result_book"></div>
     <div id="take_book">
         <h3 style="margin-left: 70px;color: cadetblue">Take books</h3>
+        <label style="margin-left: 10px;font-size: 25px">b_id</label>
+        <input type="number" id="tb_id">
+        <button type="submit" class="sub_btns" onclick="takebook()">take book</button>
     </div>
     <div id="submit_book">
         <h3 style="margin-left: 70px;color: cadetblue">Submit book</h3>
+        <label style="margin-left: 10px;font-size: 25px">b_id</label>
+        <input type="number" id="sb_id">
+        <button type="submit" class="sub_btns" onclick="submitbook()">submit book</button>
     </div>
 </div>
 
@@ -129,6 +149,8 @@
     })
 
     // fetching bookallotment
+    let booksHTML = '';
+    let booksHTMLB_id = [];
     fetch(`http://localhost:8080/bookallotment/get/owner_id/${localStorage.getItem('username')}`, {
         method: 'GET',
         headers: {
@@ -140,7 +162,7 @@
         }
         return response.json();
     }).then(data => {
-        let booksHTML = '';
+
         console.log("data", data);
 
         // Create an array of fetch promises for each book
@@ -159,6 +181,7 @@
                 console.log("data1", data1);
                 console.log("items", items);
                 booksHTML += `<p>${items.ba_id} : ${items.b_id} : ${data1.title}</p>`;
+                booksHTMLB_id.push(items.b_id);
             });
         });
 
@@ -267,6 +290,72 @@
             console.log(data);
             document.getElementById("result_book").innerHTML = data;
         })
+    }
+
+    function takebook(){
+        let b_id = document.getElementById("tb_id").value;
+        let owner_id = localStorage.getItem('username');
+        let obj = [{
+            b_id : b_id,
+            owner_id : owner_id
+        }]
+        fetch(`http://localhost:8080/bookallotment/save/all`,{
+            method : 'POST',
+            headers : {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(obj)
+        }).then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text();
+            }
+        }).then(data => {
+            if (typeof data === 'string'){
+                console.log("you cannot take this book because "+ data)
+                document.getElementById("take_book").innerHTML = "you cannot take this book because "+ data;
+            }else {
+                console.log(`<p>book took successfully</p><p>data[0].b_id </p>
+                                                           <p>data[0].ba_id </p>`)
+                document.getElementById("take_book").innerHTML = `<p>book took successfully</p><p>b_id : ${data[0].b_id} </p>
+                                                           <p>ba_id : ${data[0].ba_id} </p>`;
+            }
+        })
+    }
+
+
+    function submitbook(){
+        let b_id = document.getElementById("sb_id").value ;
+        console.log(b_id)
+        console.log(booksHTMLB_id)
+        // checking weather book took by the person or not
+        let flag = false;
+        for (let i =0 ; i<=booksHTMLB_id.length ; i++){
+            if (b_id == booksHTMLB_id[i]){
+                flag = true;
+            }
+        }
+
+        if (flag){
+            fetch(`http://localhost:8080/bookallotment/delete/b_id/${b_id}`,{
+                method : 'DELETE'
+            }).then(response => {
+                if (!response.ok){throw new Error('response not ok')}
+                return response.text();
+            }).then(data => {
+                if (data === "deleted"){
+                    document.getElementById("submit_book").innerHTML = "submited book successfully";
+                }
+            })
+        }
+    }
+
+
+    function logout(){
+        localStorage.setItem('username',null);
+        window.location.href = "login.html";
     }
 
 

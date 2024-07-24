@@ -66,14 +66,14 @@ public class BookController {
         return null;
     }
     @PostMapping("/book/save")
-    public String addBook(@RequestBody Book book) {
+    public Object addBook(@RequestBody Book book) {
         if (book.getTitle() == null){
             System.out.println("title is mandatory");
             return "book not saved";
         }
         Book book1 = bookService.saveBook(book);
         System.out.println(book1);
-        return "book saved" + book1.toString();
+        return book1;
     }
     @PostMapping("/book/save/all")
     public String addBookAll(@RequestBody List<Book> books) {

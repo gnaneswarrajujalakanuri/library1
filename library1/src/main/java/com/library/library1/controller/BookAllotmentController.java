@@ -133,7 +133,7 @@ public class BookAllotmentController {
         return "not found to delete";
     }
     @DeleteMapping("/bookallotment/delete/b_id/{b_id}")
-    public Object deleteBookAllotmentByBId(@PathVariable Long b_id) {
+    public String deleteBookAllotmentByBId(@PathVariable Long b_id) {
         try {
             Book book = bookService.getBookById(b_id);
             book.setOwner_id(null);
