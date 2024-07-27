@@ -190,7 +190,8 @@
                 .then(data => {
                     console.log(data);
                     if (data === "employee login success"){
-                        window.location.href = "index.html";
+                        localStorage.setItem('username',username);
+                        window.location.href = "employeeHome.html";
                     }else {
                         document.getElementById("res").innerHTML="login failed because password or username is wrong";
                     }

@@ -356,6 +356,12 @@
         localStorage.setItem('username',null);
         window.location.href = "login.html";
     }
+    function repeat(){
+        if (localStorage.getItem('username')==null){
+            window.location.href = "login.html";
+        }
+    }
+    setInterval(repeat(),60000);
 
 
 </script>
